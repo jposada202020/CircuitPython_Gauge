@@ -47,8 +47,8 @@ class gauge(displayio.Group):
     scales Class to add different elements to the screen.
     The origin point set by ``x`` and ``y`` properties
 
-    :param int x: origin x coordinate
-    :param int y: origin y coordinate
+    :param int x: origin x coordinate. Defaults to 0.
+    :param int y: origin y coordinate. Defaults to 0.
     :param int width: plot box width in pixels. Defaults to 100.
     :param int height: plot box height in pixels. Defaults to 100.
     :param int padding: padding for the scale box in all directions
@@ -57,6 +57,7 @@ class gauge(displayio.Group):
     :param int background_color: background color in HEX. Defaults to black ``0x000000``
     :param int box_color: allows to choose the box line color. Defaults to white ''0xFFFFFF``
 
+    :param np.array|list ticks: axis ticks values
     :param int tick_lenght: x axes tick height in pixels. Defaults to 28.
     :param int tick_color: x axes tick height in pixels. Defaults to 0xFFFFFF.
     :param str|None: Argument to locate the ticks. Left, center or all
@@ -76,16 +77,17 @@ class gauge(displayio.Group):
         scale_range: Optional[list] = [0, 150],
         background_color: int = 0x000000,
         box_color: int = 0xFF8500,
+        ticks: Optional[Union[np.array, list]] = None,
         tick_lenght: int = 28,
         tick_color: int = 0xFFFFFF,
         tick_pos: Optional[str] = None,
         pointer_lenght: int = 10,
         scale: int = 1,
     ) -> None:
-        if width not in range(50, 481) and scale == 1:
+        if width not in range(20, 481) and scale == 1:
             print("Be sure to verify your values. Defaulting to width=100")
             width = 100
-        if height not in range(50, 321) and scale == 1:
+        if height not in range(20, 321) and scale == 1:
             print("Be sure to verify your values. Defaulting to height=100")
             height = 100
         if x + width > 481:
@@ -118,7 +120,12 @@ class gauge(displayio.Group):
         self._newymin = height - padding
         self._newymax = padding
 
-        self.ticksy = np.array([element for element in range(self.ymin, self.ymax, 10)])
+        if ticks:
+            self.ticks = np.array(ticks)
+        else:
+            self.ticks = np.array(
+                [element for element in range(self.ymin, self.ymax, 10)]
+            )
 
         self._showtext = True
 
@@ -173,45 +180,38 @@ class gauge(displayio.Group):
 
         """
 
-        draw_box = [True, True, True, True]
-
-        if draw_box[0]:
-            # y axes line
-            draw_line(
-                self._plotbitmap,
-                self.padding,
-                self.padding,
-                self.padding,
-                self._height - self.padding,
-                1,
-            )
-        if draw_box[1]:
-            draw_line(
-                self._plotbitmap,
-                self.padding,
-                self._height - self.padding,
-                self._width - self.padding,
-                self._height - self.padding,
-                1,
-            )
-        if draw_box[2]:
-            draw_line(
-                self._plotbitmap,
-                self._width - self.padding,
-                self.padding,
-                self._width - self.padding,
-                self._height - self.padding,
-                1,
-            )
-        if draw_box[3]:
-            draw_line(
-                self._plotbitmap,
-                self.padding,
-                self.padding,
-                self._width - self.padding,
-                self.padding,
-                1,
-            )
+        draw_line(
+            self._plotbitmap,
+            self.padding,
+            self.padding,
+            self.padding,
+            self._height - self.padding,
+            1,
+        )
+        draw_line(
+            self._plotbitmap,
+            self.padding,
+            self._height - self.padding,
+            self._width - self.padding,
+            self._height - self.padding,
+            1,
+        )
+        draw_line(
+            self._plotbitmap,
+            self._width - self.padding,
+            self.padding,
+            self._width - self.padding,
+            self._height - self.padding,
+            1,
+        )
+        draw_line(
+            self._plotbitmap,
+            self.padding,
+            self.padding,
+            self._width - self.padding,
+            self.padding,
+            1,
+        )
 
     @staticmethod
     def transform(
@@ -247,14 +247,12 @@ class gauge(displayio.Group):
 
         ticksynorm = np.array(
             self.transform(
-                self.ymin, self.ymax, self._newymin, self._newymax, self.ticksy
+                self.ymin, self.ymax, self._newymin, self._newymax, self.ticks
             ),
             dtype=np.int16,
         )
 
         for i, tick in enumerate(ticksynorm):
-            if i == 0:
-                continue
             draw_line(
                 self._plotbitmap,
                 self._newxmin + self._tickpos,
@@ -265,7 +263,7 @@ class gauge(displayio.Group):
             )
             if self._showtext:
                 self.show_text(
-                    "{:.2f}".format(self.ticksy[i]), self._newxmin, tick, (1.0, 0.5)
+                    "{:.2f}".format(self.ticks[i]), self._newxmin, tick, (1.0, 0.5)
                 )
 
     def show_text(

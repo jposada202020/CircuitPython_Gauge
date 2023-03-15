@@ -16,7 +16,9 @@ Introduction
     :target: https://github.com/psf/black
     :alt: Code Style: Black
 
-CircuitPython Gauge
+CircuitPython Gauge. Simple customizable gauge widget.
+
+.. image:: https://github.com/jposada202020/CircuitPython_gauge/blob/main/docs/gauge.png
 
 
 Dependencies
@@ -24,17 +26,6 @@ Dependencies
 This driver depends on:
 
 * `Adafruit CircuitPython <https://github.com/adafruit/circuitpython>`_
-
-Please ensure all dependencies are available on the CircuitPython filesystem.
-This is easily achieved by downloading
-`the Adafruit library and driver bundle <https://circuitpython.org/libraries>`_
-or individual libraries can be installed using
-`circup <https://github.com/adafruit/circup>`_.Installing from PyPI
-
-
-.. note:: This library is not available on PyPI yet. Install documentation is included
-   as a standard element. Stay tuned for PyPI availability!
-
 
 On supported GNU/Linux systems like the Raspberry Pi, you can install the driver locally `from
 PyPI <https://pypi.org/project/circuitpython-gauge/>`_.
@@ -86,9 +77,6 @@ Or the following command to update an existing version:
 Documentation
 =============
 API documentation for this library can be found on `Read the Docs <https://circuitpython-gauge.readthedocs.io/>`_.
-
-For information on building library documentation, please check out
-`this guide <https://learn.adafruit.com/creating-and-sharing-a-circuitpython-library/sharing-our-docs-on-readthedocs#sphinx-5-1>`_.
 
 Contributing
 ============
