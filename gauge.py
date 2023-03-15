@@ -83,6 +83,8 @@ class gauge(displayio.Group):
         tick_pos: Optional[str] = None,
         pointer_lenght: int = 10,
         scale: int = 1,
+        show_text: bool = False,
+        text_format: Optional[str] = None,
     ) -> None:
         if width not in range(20, 481) and scale == 1:
             print("Be sure to verify your values. Defaulting to width=100")
@@ -127,7 +129,7 @@ class gauge(displayio.Group):
                 [element for element in range(self.ymin, self.ymax, 10)]
             )
 
-        self._showtext = True
+        self._showtext = show_text
 
         self._tickcolor = tick_color
         self._pointer_palette = displayio.Palette(2)
@@ -147,6 +149,11 @@ class gauge(displayio.Group):
         self.value = 0
 
         self._showticks = True
+
+        if text_format == "float":
+            self._text_format = True
+        else:
+            self._text_format = False
 
         self._plotbitmap = displayio.Bitmap(width, height, 4)
 
@@ -262,9 +269,17 @@ class gauge(displayio.Group):
                 2,
             )
             if self._showtext:
-                self.show_text(
-                    "{:.2f}".format(self.ticks[i]), self._newxmin, tick, (1.0, 0.5)
-                )
+                if self._text_format:
+                    self.show_text(
+                        "{:.2f}".format(self.ticks[i]), self._newxmin, tick, (1.0, 0.5)
+                    )
+                else:
+                    self.show_text(
+                        "{:d}".format(int(self.ticks[i])),
+                        self._newxmin,
+                        tick,
+                        (1.0, 0.5),
+                    )
 
     def show_text(
         self, text: str, x: int, y: int, anchorpoint: Tuple = (0.5, 0.0)
