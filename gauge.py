@@ -271,7 +271,7 @@ class gauge(displayio.Group):
     ) -> None:
         """
 
-        Show desired text in the scree
+        Show desired text in the screen
         :param str text: text to be displayed
         :param int x: x coordinate
         :param int y: y coordinate
@@ -310,8 +310,10 @@ class gauge(displayio.Group):
     def update(self, new_value):
         """
         Function to update gauge value
+
         :param new_value: value to be updated
         :return: None
+
         """
         self.value = int(
             self.transform(
