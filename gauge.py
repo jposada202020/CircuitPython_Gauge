@@ -49,10 +49,10 @@ class gauge(displayio.Group):
 
     :param int x: origin x coordinate. Defaults to 0.
     :param int y: origin y coordinate. Defaults to 0.
-    :param int width: plot box width in pixels. Defaults to 100.
-    :param int height: plot box height in pixels. Defaults to 100.
-    :param int padding: padding for the scale box in all directions
-    :param list|None scale_range: x range limits. Defaults to None
+    :param width: plot box width in pixels. Defaults to 100.
+    :param height: plot box height in pixels. Defaults to 100.
+    :param padding: padding for the scale box in all directions
+    :param scale_range: x range limits. Defaults to None
 
     :param int background_color: background color in HEX. Defaults to black ``0x000000``
     :param int box_color: allows to choose the box line color. Defaults to white ''0xFFFFFF``
@@ -60,7 +60,7 @@ class gauge(displayio.Group):
     :param np.array|list ticks: axis ticks values
     :param int tick_lenght: x axes tick height in pixels. Defaults to 28.
     :param int tick_color: x axes tick height in pixels. Defaults to 0xFFFFFF.
-    :param str|None: Argument to locate the ticks. Left, center or all
+    :param tick_pos: Argument to locate the ticks. Left, center or all
     :param int pointer_lenght: width of the bar. Defaults to 10.
     :param int scale: scale of the widget
 
