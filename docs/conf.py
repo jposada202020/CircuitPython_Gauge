@@ -20,7 +20,6 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinx.ext.todo",
-    "sphinx_autodoc_typehints",
 ]
 
 
