@@ -17,3 +17,14 @@ Example showing a AS7341 light sensor with up to 8 gages updating the different 
 .. literalinclude:: ../examples/gauge_as7341_text.py
     :caption: examples/gauge_as7341_text.py
     :linenos:
+
+
+Threshold Setting Example test
+--------------------------------
+
+Example showing how to set the threshold limit to change the bar color
+
+.. literalinclude:: ../examples/gauge_threshold_setting.py
+    :caption: examples/gauge_threshold_setting.py
+    :linenos:
+.. image:: ../docs/7miijo.gif

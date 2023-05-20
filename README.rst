@@ -23,6 +23,8 @@ CircuitPython Gauge. Simple customizable gauge widget.
 
 .. image:: https://github.com/jposada202020/CircuitPython_gauge/blob/main/docs/gauge.png
 
+.. image:: https://github.com/jposada202020/CircuitPython_gauge/blob/main/docs/7miijo.gif
+
 
 Dependencies
 =============

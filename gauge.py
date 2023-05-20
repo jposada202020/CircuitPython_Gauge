@@ -80,6 +80,7 @@ class gauge(displayio.Group):
         ticks: Optional[Union[np.array, list]] = None,
         tick_lenght: int = 28,
         tick_color: int = 0xFFFFFF,
+        tick_color_threshold: int = 0xFF0000,
         tick_pos: Optional[str] = None,
         pointer_lenght: int = 10,
         scale: int = 1,
@@ -132,9 +133,11 @@ class gauge(displayio.Group):
         self._showtext = show_text
 
         self._tickcolor = tick_color
-        self._pointer_palette = displayio.Palette(2)
+        self._tick_color_threshold = tick_color_threshold
+        self._pointer_palette = displayio.Palette(3)
         self._pointer_palette.make_transparent(0)
         self._pointer_palette[1] = self._tickcolor
+        self._pointer_palette[2] = self._tick_color_threshold
         self.pointer = None
         self._pointer_lenght = pointer_lenght
         self._tick_lenght = tick_lenght
@@ -147,6 +150,7 @@ class gauge(displayio.Group):
             self._tick_lenght = self._width
 
         self.value = 0
+        self.threshold = 0
 
         self._showticks = True
 
@@ -155,12 +159,11 @@ class gauge(displayio.Group):
         else:
             self._text_format = False
 
-        self._plotbitmap = displayio.Bitmap(width, height, 4)
+        self._plotbitmap = displayio.Bitmap(width, height, 6)
 
-        self.pointer_size = 6
         self._drawbox()
 
-        self._plot_palette = displayio.Palette(4)
+        self._plot_palette = displayio.Palette(6)
         self._plot_palette[0] = background_color
         self._plot_palette[1] = box_color
         self._plot_palette[2] = self._tickcolor
@@ -305,7 +308,7 @@ class gauge(displayio.Group):
         self.x0 = self._center - self._pointer_lenght // 2
         self.y0 = self._newymin
         self.x1 = self._center + self._pointer_lenght // 2
-        self.y1 = self._newymin - self.pointer_size - self.value
+        self.y1 = self._newymin - self.value
 
         self.points = [
             (self.x0, self.y0),
@@ -313,6 +316,7 @@ class gauge(displayio.Group):
             (self.x1, self.y1),
             (self.x0, self.y1),
         ]
+
         self.pointer = Polygon(
             pixel_shader=self._pointer_palette,
             points=self.points,
@@ -329,19 +333,37 @@ class gauge(displayio.Group):
         :param new_value: value to be updated
         :return: None
 
+
         """
         self.value = int(
             self.transform(
                 self.ymin, self.ymax, self._newymax, self._newymin, new_value
             )
         )
-        if self.value >= self._newymin - self.pointer_size:
-            self.value = self._newymin - self.pointer_size
-        self.y1 = self._newymin - self.pointer_size - self.value
+
+        if self.value >= self._newymin:
+            self.value = self._newymin
+
+        self.y1 = self._newymin - self.value
         self.points = [
             (self.x0, self.y0),
             (self.x1, self.y0),
             (self.x1, self.y1),
             (self.x0, self.y1),
         ]
+
+        if self.value > self.threshold:
+            self.pointer.color_index = 2
+        else:
+            self.pointer.color_index = 1
         self.pointer.points = self.points
+
+    def set_threshold(self, value: int, color: int = 0xFF0000) -> None:
+        """
+        Defines the threshold for the gage to change color
+        :param value: value that will trigger the change
+        :param color: color to change into. Defaults to red :const:`0xFF0000`
+        :return: None
+        """
+        self._pointer_palette[2] = color
+        self.threshold = value
