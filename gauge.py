@@ -27,9 +27,9 @@ try:
 except ImportError:
     pass
 
+from bitmaptools import draw_polygon, draw_line
 import displayio
 import terminalio
-from bitmaptools import draw_line
 from vectorio import Polygon
 from ulab import numpy as np
 
@@ -50,7 +50,7 @@ class gauge(displayio.Group):
     :param int x: origin x coordinate. Defaults to 0.
     :param int y: origin y coordinate. Defaults to 0.
     :param int width: plot box width in pixels. Defaults to 100.
-    :param int height: plot box height in pixels. Defaults to 100.
+    :param int length: plot box height in pixels. Defaults to 100.
     :param int padding: padding for the scale box in all directions
     :param list|None scale_range: x range limits. Defaults to None
 
@@ -64,6 +64,8 @@ class gauge(displayio.Group):
     :param int pointer_lenght: width of the bar. Defaults to 10.
     :param int scale: scale of the widget
 
+    :param str direction: direction of the scale either :attr:`horizontal` or :attr:`Vertical`
+     defaults to :attr:`Vertical`
 
     """
 
@@ -72,8 +74,8 @@ class gauge(displayio.Group):
         x: int = 0,
         y: int = 0,
         width: int = 100,
-        height: int = 100,
-        padding: int = 1,
+        length: int = 100,
+        padding: int = 0,
         scale_range: Optional[list] = [0, 150],
         background_color: int = 0x000000,
         box_color: int = 0xFF8500,
@@ -86,49 +88,42 @@ class gauge(displayio.Group):
         scale: int = 1,
         show_text: bool = False,
         text_format: Optional[str] = None,
+        direction: str = "Vertical",
     ) -> None:
-        if width not in range(20, 481) and scale == 1:
-            print("Be sure to verify your values. Defaulting to width=100")
-            width = 100
-        if height not in range(20, 321) and scale == 1:
-            print("Be sure to verify your values. Defaulting to height=100")
-            height = 100
-        if x + width > 481:
-            print(
-                "Modify this settings. Some of the graphics will not shown int the screen"
-            )
-            print("Defaulting to x=0")
-            x = 0
-        if y + height > 321:
-            print(
-                "Modify this settings. Some of the graphics will not shown int the screen"
-            )
-            print("Defaulting to y=0")
-            y = 0
-
         super().__init__(x=x, y=y, scale=scale)
-
-        self._width = width
-        self._height = height
-
         self.padding = padding
+        if direction == "Vertical":
+            self.direction = True
+            self._width = width
+            self._length = length
+            self._newvaluemin = self._length - self.padding
+            self._newvaluemax = self.padding
+            self._newxmin = self.padding
+            self._newxmax = self._width - self.padding
+        else:
+            self.direction = False
+            self._width = length
+            self._length = width
+            self._newvaluemin = self.padding
+            self._newvaluemax = self._width - self.padding
+            self._newxmin = self.padding
+            self._newxmax = self._length - self.padding
 
-        self.ymin = scale_range[0]
-        self.ymax = scale_range[1]
-        self._newxmin = padding
-        self._newxmax = width - padding
+        self._plotbitmap = displayio.Bitmap(self._width + 1, self._length + 1, 6)
 
-        self._center = (self._newxmax - self._newxmin) // 2
+        # Box Points
+        self._boxpos_x0 = self.padding
+        self._boxpos_y0 = self.padding
+        self._boxpos_x1 = self._width - self.padding
+        self._boxpos_y1 = self._length - self.padding
 
-        self._newymin = height - padding
-        self._newymax = padding
+        self._valuemin = scale_range[0]
+        self._valuemax = scale_range[1]
 
         if ticks:
             self.ticks = np.array(ticks)
         else:
-            self.ticks = np.array(
-                [element for element in range(self.ymin, self.ymax, 10)]
-            )
+            self.ticks = np.array(list(range(self._valuemin, self._valuemax, 10)))
 
         self._showtext = show_text
 
@@ -139,15 +134,8 @@ class gauge(displayio.Group):
         self._pointer_palette[1] = self._tickcolor
         self._pointer_palette[2] = self._tick_color_threshold
         self.pointer = None
-        self._pointer_lenght = pointer_lenght
-        self._tick_lenght = tick_lenght
-        if tick_pos == "left":
-            self._tickpos = self._newxmin
-        elif tick_pos == "center":
-            self._tickpos = self._center - self._tick_lenght // 2
-        else:
-            self._tickpos = self._newxmin
-            self._tick_lenght = self._width
+        self._pointer_length = pointer_lenght
+        self._tick_length = tick_lenght
 
         self.value = 0
         self.threshold = 0
@@ -159,20 +147,33 @@ class gauge(displayio.Group):
         else:
             self._text_format = False
 
-        self._plotbitmap = displayio.Bitmap(width, height, 6)
-
-        self._drawbox()
-
         self._plot_palette = displayio.Palette(6)
         self._plot_palette[0] = background_color
         self._plot_palette[1] = box_color
         self._plot_palette[2] = self._tickcolor
 
         self.points = None
-        self.y0 = None
-        self.x0 = None
-        self.y1 = None
-        self.x1 = None
+
+        if self.direction:
+            self._center = (self._newxmax - self._newxmin) // 2
+            self.x0 = self._center - self._pointer_length // 2 + 2 * self.padding
+            self.y0 = self._newvaluemin
+            self.x1 = self._center + self._pointer_length // 2
+            self.y1 = self._newvaluemin - self.value
+        else:
+            self._center = (self._newxmax - self._newxmin) // 2
+            self.x0 = self._boxpos_x0 + self.padding
+            self.y0 = self._center - self._pointer_length // 2
+            self.x1 = self._boxpos_x0 + self.value
+            self.y1 = self._center + self._pointer_length // 2
+
+        if tick_pos == "left":
+            self._tickpos = self._newxmin
+        elif tick_pos == "center":
+            self._tickpos = self._center - self._tick_length // 2
+        else:
+            self._tickpos = self._newxmin
+            self._tick_length = self._width
 
         self.append(
             displayio.TileGrid(
@@ -181,6 +182,7 @@ class gauge(displayio.Group):
         )
         self._draw_ticks()
         self._draw_pointer()
+        self._drawbox()
 
     def _drawbox(self) -> None:
         """
@@ -189,39 +191,9 @@ class gauge(displayio.Group):
         :return: None
 
         """
-
-        draw_line(
-            self._plotbitmap,
-            self.padding,
-            self.padding,
-            self.padding,
-            self._height - self.padding,
-            1,
-        )
-        draw_line(
-            self._plotbitmap,
-            self.padding,
-            self._height - self.padding,
-            self._width - self.padding,
-            self._height - self.padding,
-            1,
-        )
-        draw_line(
-            self._plotbitmap,
-            self._width - self.padding,
-            self.padding,
-            self._width - self.padding,
-            self._height - self.padding,
-            1,
-        )
-        draw_line(
-            self._plotbitmap,
-            self.padding,
-            self.padding,
-            self._width - self.padding,
-            self.padding,
-            1,
-        )
+        xs = bytes([self._boxpos_x0, self._boxpos_x0, self._boxpos_x1, self._boxpos_x1])
+        ys = bytes([self._boxpos_y0, self._boxpos_y1, self._boxpos_y1, self._boxpos_y0])
+        draw_polygon(self._plotbitmap, xs, ys, 1)
 
     @staticmethod
     def transform(
@@ -255,34 +227,66 @@ class gauge(displayio.Group):
 
         """
 
-        ticksynorm = np.array(
+        ticksnorm = np.array(
             self.transform(
-                self.ymin, self.ymax, self._newymin, self._newymax, self.ticks
+                self._valuemin,
+                self._valuemax,
+                self._newvaluemin,
+                self._newvaluemax,
+                self.ticks,
             ),
             dtype=np.int16,
         )
-
-        for i, tick in enumerate(ticksynorm):
-            draw_line(
-                self._plotbitmap,
-                self._newxmin + self._tickpos,
-                tick,
-                self._newxmin + self._tick_lenght + self._tickpos,
-                tick,
-                2,
-            )
-            if self._showtext:
-                if self._text_format:
-                    self.show_text(
-                        "{:.2f}".format(self.ticks[i]), self._newxmin, tick, (1.0, 0.5)
-                    )
-                else:
-                    self.show_text(
-                        "{:d}".format(int(self.ticks[i])),
-                        self._newxmin,
-                        tick,
-                        (1.0, 0.5),
-                    )
+        if self.direction:
+            for i, tick in enumerate(ticksnorm):
+                draw_line(
+                    self._plotbitmap,
+                    self._newxmin + self._tickpos,
+                    tick,
+                    self._newxmin + self._tick_length + self._tickpos,
+                    tick,
+                    2,
+                )
+                if self._showtext:
+                    if self._text_format:
+                        self.show_text(
+                            "{:.2f}".format(self.ticks[i]),
+                            self._newxmin,
+                            tick,
+                            (1.0, 0.5),
+                        )
+                    else:
+                        self.show_text(
+                            "{:d}".format(int(self.ticks[i])),
+                            self._newxmin,
+                            tick,
+                            (1.0, 0.5),
+                        )
+        else:
+            for i, tick in enumerate(ticksnorm):
+                draw_line(
+                    self._plotbitmap,
+                    self._boxpos_x0 + tick,
+                    self._boxpos_y0 + self._tickpos,
+                    self._boxpos_x0 + tick,
+                    self._boxpos_y0 + self._tick_length + self._tickpos,
+                    2,
+                )
+                if self._showtext:
+                    if self._text_format:
+                        self.show_text(
+                            "{:.2f}".format(self.ticks[i]),
+                            tick,
+                            self._boxpos_y1,
+                            (0.5, 0.0),
+                        )
+                    else:
+                        self.show_text(
+                            "{:d}".format(int(self.ticks[i])),
+                            tick,
+                            self._boxpos_y1,
+                            (0.5, 0.0),
+                        )
 
     def show_text(
         self, text: str, x: int, y: int, anchorpoint: Tuple = (0.5, 0.0)
@@ -305,11 +309,6 @@ class gauge(displayio.Group):
             self.append(text_toplot)
 
     def _draw_pointer(self):
-        self.x0 = self._center - self._pointer_lenght // 2 + 2 * self.padding
-        self.y0 = self._newymin
-        self.x1 = self._center + self._pointer_lenght // 2
-        self.y1 = self._newymin - self.value
-
         self.points = [
             (self.x0, self.y0),
             (self.x1, self.y0),
@@ -333,18 +332,32 @@ class gauge(displayio.Group):
         :param new_value: value to be updated
         :return: None
 
-
         """
-        self.value = int(
-            self.transform(
-                self.ymin, self.ymax, self._newymax, self._newymin, new_value
+
+        if self.direction:
+            self.value = int(
+                self.transform(
+                    self._valuemin,
+                    self._valuemax,
+                    self._newvaluemax,
+                    self._newvaluemin,
+                    new_value,
+                )
             )
-        )
-
-        if self.value >= self._newymin:
-            self.value = self._newymin
-
-        self.y1 = self._newymin - self.value
+            if self.value >= self._newvaluemin:
+                self.value = self._newvaluemin
+            self.y1 = self._newvaluemin - self.value
+        else:
+            self.value = int(
+                self.transform(
+                    self._valuemin,
+                    self._valuemax,
+                    self._newvaluemin,
+                    self._newvaluemax,
+                    new_value,
+                )
+            )
+            self.x1 = self._newvaluemin + self.value
         self.points = [
             (self.x0, self.y0),
             (self.x1, self.y0),

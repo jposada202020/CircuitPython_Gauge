@@ -28,3 +28,12 @@ Example showing how to set the threshold limit to change the bar color
     :caption: examples/gauge_threshold_setting.py
     :linenos:
 .. image:: ../docs/7miijo.gif
+
+Horizontal Gauge
+--------------------------------
+
+Example showing how to set horizontal gages
+
+.. literalinclude:: ../examples/gauge_horizontal.py
+    :caption: examples/gauge_horizontal.py
+    :linenos:
