@@ -305,7 +305,7 @@ class gauge(displayio.Group):
             self.append(text_toplot)
 
     def _draw_pointer(self):
-        self.x0 = self._center - self._pointer_lenght // 2
+        self.x0 = self._center - self._pointer_lenght // 2 + 2 * self.padding
         self.y0 = self._newymin
         self.x1 = self._center + self._pointer_lenght // 2
         self.y1 = self._newymin - self.value
