@@ -5,7 +5,7 @@ Simple demonstration of the gauge library
 
 .. literalinclude:: ../examples/gauge_simpletest.py
     :caption: examples/gauge_simpletest.py
-    :linenos:
+    :lines: 5-
 .. image:: ../docs/gauge.jpg
 
 
@@ -16,7 +16,7 @@ Example showing a AS7341 light sensor with up to 8 gages updating the different 
 
 .. literalinclude:: ../examples/gauge_as7341_text.py
     :caption: examples/gauge_as7341_text.py
-    :linenos:
+    :lines: 5-
 
 
 Threshold Setting Example test
@@ -26,7 +26,7 @@ Example showing how to set the threshold limit to change the bar color
 
 .. literalinclude:: ../examples/gauge_threshold_setting.py
     :caption: examples/gauge_threshold_setting.py
-    :linenos:
+    :lines: 5-
 .. image:: ../docs/7miijo.gif
 
 Horizontal Gauge
@@ -36,4 +36,4 @@ Example showing how to set horizontal gages
 
 .. literalinclude:: ../examples/gauge_horizontal.py
     :caption: examples/gauge_horizontal.py
-    :linenos:
+    :lines: 5-
