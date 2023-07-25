@@ -1,5 +1,5 @@
-Gauge Library
-==============
+CircuitPython Gauge Library
+============================
 
 .. automodule:: gauge
     :members:

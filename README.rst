@@ -77,15 +77,3 @@ Or the following command to update an existing version:
 .. code-block:: shell
 
     circup update
-
-
-Documentation
-=============
-API documentation for this library can be found on `Read the Docs <https://circuitpython-gauge.readthedocs.io/>`_.
-
-Contributing
-============
-
-Contributions are welcome! Please read our `Code of Conduct
-<https://github.com/jposada202020/CircuitPython_Gauge/blob/HEAD/CODE_OF_CONDUCT.md>`_
-before contributing to help this project stay welcoming.

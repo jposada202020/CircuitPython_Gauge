@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright (c) 2023 Jose D. Montoya for Jose D.
+# SPDX-FileCopyrightText: Copyright (c) 2023 Jose D. Montoya
 #
 # SPDX-License-Identifier: MIT
 """
@@ -8,7 +8,7 @@
 CircuitPython Gauge
 
 
-* Author(s): Jose D. Montoya
+* Author: Jose D. Montoya
 
 Implementation Notes
 --------------------
@@ -35,11 +35,6 @@ from ulab import numpy as np
 
 __version__ = "0.0.0+auto.0"
 __repo__ = "https://github.com/jposada202020/CircuitPython_Gauge.git"
-
-# pylint: disable=too-many-arguments, too-many-instance-attributes, too-many-locals
-# pylint: disable=too-many-statements, unnecessary-comprehension
-# pylint: disable=unused-import, import-outside-toplevel, undefined-variable
-# pylint: disable=invalid-name, dangerous-default-value
 
 
 class gauge(displayio.Group):
@@ -76,7 +71,7 @@ class gauge(displayio.Group):
         width: int = 100,
         length: int = 100,
         padding: int = 0,
-        scale_range: Optional[list] = [0, 150],
+        scale_range: Optional[list] = None,
         background_color: int = 0x000000,
         box_color: int = 0xFF8500,
         ticks: Optional[Union[np.array, list]] = None,
